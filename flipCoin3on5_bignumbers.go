@@ -14,7 +14,6 @@ import (
 
 // 0= coroa, 1=cara 
 func lancaMoeda() int{
-	rand.Seed(time.Now().UnixNano())
     return rand.Intn(2)
 }
 
@@ -45,6 +44,7 @@ const alvoCaras = 3
 func main() {
     var wg sync.WaitGroup
 
+	rand.Seed(time.Now().UnixNano())
 	totalSimulacoes, err := strconv.ParseInt(os.Args[1], 10, 64)
     if err != nil{
         log.Fatal(err)
