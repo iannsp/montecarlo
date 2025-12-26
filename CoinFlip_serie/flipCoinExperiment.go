@@ -12,10 +12,12 @@ func lancaMoeda() int{
     return rand.Intn(2)
 }
 
-func rodada( numSimulations int) float64 {
-
-	sucessos := 0
-	for i := 0; i < numSimulations ; i++ {
+/*
+ange numSimulations for simtoRun to say how much simulations need to run
+*/
+func rodada( simtoRun int, totalSimulacoes int, sucessos int) (int, int){
+    fmt.Printf("Rodando %d simulacoes a mais...\n", simtoRun)
+	for i := 0; i < simtoRun; i++ {
 		carasNoExperimento := 0
 
         // lancar a moeda 5 vezes.	
@@ -31,8 +33,7 @@ func rodada( numSimulations int) float64 {
 		}
 	}
 
-	// Calculando a probabilidade estimada
-	return float64(sucessos) / float64(numSimulations)
+	return sucessos, (totalSimulacoes + simtoRun)
 }
 
 const lancamentosPorVez = 5
@@ -42,27 +43,38 @@ func main() {
 
 	rand.Seed(time.Now().UnixNano())
     // delta aceitavel na estimativa 0.0001
+
     variacaoAceita := 0.00014
-	totalSimulacoes := 10000000
     stepSize := 1000000
     nivelConfianca := 1.96 // = 95% de confiança.
-    
+    sucessos := 0
+	totalSimulacoes := 10000000
 
     probabilidadeEstimada:= 0.0
+
+    sucessos, totalSimulacoes = rodada(totalSimulacoes,0,sucessos)
+
+
+    // start simulations 
     for {
-        fmt.Printf("\n----------\n Tamanho Amostragem: %d\n", totalSimulacoes)
-        probabilidadeEstimada = rodada(totalSimulacoes)
-        erroPadrao := math.Sqrt( (probabilidadeEstimada * ( 1- probabilidadeEstimada)) / float64(totalSimulacoes))
-        margemErroAtual := nivelConfianca * erroPadrao
-            fmt.Printf("Estimativa : %f | Margem de erro : %.4f \n", probabilidadeEstimada, margemErroAtual )
+            probabilidadeEstimada = float64(sucessos) / float64(totalSimulacoes)
+            erroPadrao := math.Sqrt( (probabilidadeEstimada * ( 1- probabilidadeEstimada)) / float64(totalSimulacoes))
+            margemErroAtual := nivelConfianca * erroPadrao
+
+            // start by checking the stop rules
             if  margemErroAtual > variacaoAceita {
-                totalSimulacoes = totalSimulacoes + stepSize
                 fmt.Printf("[NOK] Margem de Erro %f > %f.\n", margemErroAtual , variacaoAceita)
             }else {
                 fmt.Printf("[OK] Margem de Erro %f < %f.\n", margemErroAtual,variacaoAceita)
                 break
             }
+
+            fmt.Printf("\n----------\n Tamanho Amostragem/sucessos: %d / %d \n", totalSimulacoes, sucessos)
+            fmt.Printf("Estimativa : %f | Margem de erro : %.4f \n", probabilidadeEstimada, margemErroAtual )
+
+            sucessos, totalSimulacoes = rodada(stepSize, totalSimulacoes, sucessos)
     }
-	fmt.Printf("Simulou %d rodadas de %d lançamentos...\n", totalSimulacoes, lancamentosPorVez)
+
+	fmt.Printf("Simulou %d rodadas de %d lançamentos: sucessos %d...\n", totalSimulacoes, lancamentosPorVez, sucessos)
 	fmt.Printf("Probabilidade Estimada: %.4f (%.2f%%)\n", probabilidadeEstimada, probabilidadeEstimada*100)
 }
