@@ -71,7 +71,6 @@ func main() {
     probabilidadeEstimada:= 0.0
 
     sucessos, totalSimulacoes = rodadaParalela(totalSimulacoes,0,sucessos)
-    fmt.Printf("Sucesso %d, totalSimulacoes %d\n", sucessos, totalSimulacoes)
     // start simulations 
     for {
             probabilidadeEstimada = float64(sucessos) / float64(totalSimulacoes)
@@ -80,14 +79,9 @@ func main() {
 
             // start by checking the stop rules
             if  margemErroAtual > variacaoAceita {
-                fmt.Printf("[NOK] Margem de Erro %f > %f.\n", margemErroAtual , variacaoAceita)
             }else {
-                fmt.Printf("[OK] Margem de Erro %f < %f.\n", margemErroAtual,variacaoAceita)
                 break
             }
-
-            fmt.Printf("\n----------\n Tamanho Amostragem/sucessos: %d / %d \n", totalSimulacoes, sucessos)
-            fmt.Printf("Estimativa : %f | Margem de erro : %.4f \n", probabilidadeEstimada, margemErroAtual )
 
             sucessos, totalSimulacoes = rodadaParalela(stepSize, totalSimulacoes, sucessos)
     }
