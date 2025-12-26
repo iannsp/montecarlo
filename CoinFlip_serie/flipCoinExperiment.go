@@ -3,45 +3,33 @@ package main
 import (
 	"fmt"
 	"math/rand"
+    "math/bits"
     "math"
 	"time"
 )
 
-// 0= coroa, 1=cara 
-func lancaMoeda() int{
-    return rand.Intn(2)
-}
-
 /*
-ange numSimulations for simtoRun to say how much simulations need to run
+change numSimulations for simtoRun to say how much simulations need to run
 */
-func rodada( simtoRun int, totalSimulacoes int, sucessos int) (int, int){
+func rodada( simtoRun int, totalSimulacoes int, sucessos int, r * rand.Rand) (int, int){
     fmt.Printf("Rodando %d simulacoes a mais...\n", simtoRun)
 	for i := 0; i < simtoRun; i++ {
 		carasNoExperimento := 0
-
         // lancar a moeda 5 vezes.	
-		for j := 0; j < lancamentosPorVez; j++ {
-			if lancaMoeda() == 1 {
-				carasNoExperimento++
-			}
-		}
-
-		// Se o experimento resultou em exatamente 3 caras, contamos como sucesso
+        res := r.Uint32() & mask
+        carasNoExperimento = bits.OnesCount32(res)
 		if carasNoExperimento == alvoCaras {
 			sucessos++
 		}
 	}
-
 	return sucessos, (totalSimulacoes + simtoRun)
 }
 
 const lancamentosPorVez = 5
 const alvoCaras = 3
-
+const mask = (1 << lancamentosPorVez) -1
 func main() {
-
-	rand.Seed(time.Now().UnixNano())
+    r := rand.New(rand.NewSource(time.Now().UnixNano()))
     // delta aceitavel na estimativa 0.0001
 
     variacaoAceita := 0.00014
@@ -52,9 +40,7 @@ func main() {
 
     probabilidadeEstimada:= 0.0
 
-    sucessos, totalSimulacoes = rodada(totalSimulacoes,0,sucessos)
-
-
+    sucessos, totalSimulacoes = rodada(totalSimulacoes,0,sucessos, r)
     // start simulations 
     for {
             probabilidadeEstimada = float64(sucessos) / float64(totalSimulacoes)
@@ -72,7 +58,7 @@ func main() {
             fmt.Printf("\n----------\n Tamanho Amostragem/sucessos: %d / %d \n", totalSimulacoes, sucessos)
             fmt.Printf("Estimativa : %f | Margem de erro : %.4f \n", probabilidadeEstimada, margemErroAtual )
 
-            sucessos, totalSimulacoes = rodada(stepSize, totalSimulacoes, sucessos)
+            sucessos, totalSimulacoes = rodada(stepSize, totalSimulacoes, sucessos, r)
     }
 
 	fmt.Printf("Simulou %d rodadas de %d lançamentos: sucessos %d...\n", totalSimulacoes, lancamentosPorVez, sucessos)
