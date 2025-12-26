@@ -50,6 +50,6 @@ func main() {
 
 	fmt.Printf("Simulou %d rodadas de %d lançamentos...\n", totalSimulacoes, lancamentosPorVez)
 	fmt.Printf("Casos com exatamente %d caras: %d\n", alvoCaras, sucessos)
-	fmt.Printf("Probabilidade Estimada: %.4f (%.2f%%)\n", probabilidadeEstimada, probabilidadeEstimada*100)
+	fmt.Printf("Probabilidade Estimada: %.7f (%.2f%%)\n", probabilidadeEstimada, probabilidadeEstimada*100)
 	fmt.Println("Probabilidade Teórica: 0.3125 (31.25%)")
 }
